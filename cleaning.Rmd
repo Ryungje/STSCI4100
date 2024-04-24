@@ -1,0 +1,87 @@
+---
+title: "BTRY 4110: final project, data cleaning"
+author: "ik273"
+date: "2024-04-23"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r 1}
+library(stringr)
+# READ IN DATA
+movies_raw <- read.csv("movies_raw.csv", row.names = 1 )
+movies <- movies_raw
+```
+
+## Clean Data
+
+
+```{r 2}
+# change class of each variable
+  # change running time
+running_times_matrix <- str_match(movies$Running.Time, "(\\d+) hr(?: (\\d+) min)?")[,c(2,3)]
+running_times_matrix <- matrix(as.integer(running_times_matrix), ncol = 2, byrow = F)
+running_times_matrix[,1] <- running_times_matrix[,1] * 60
+movies$Running.Time <- rowSums(running_times_matrix, na.rm=T)
+
+  # change all money variables
+movies$Total.Gross <- as.numeric( gsub("[\\$,]", "", movies$Total.Gross) )
+movies$Opening <- as.numeric( gsub("[\\$,]", "", movies$Opening) )
+movies$Budget <- as.numeric( gsub("[\\$,]", "", movies$Budget) )
+movies$Weekly <- as.numeric( gsub("[\\$,]", "", movies$Weekly) )
+movies$To.Date <- as.numeric( gsub("[\\$,]", "", movies$To.Date) )
+
+  # change Release Date
+movies$Release.Date <- as.Date(movies$Release.Date)
+movies$ReleaseDate_2 <- as.Date(movies$ReleaseDate_2, format = "%b %d, %Y")
+movies$Release.Date <- coalesce(movies$Release.Date, movies$ReleaseDate_2)
+movies$ReleaseDate_2 <- NULL
+
+  # change Date variable
+    # set the variable as the first day of the week that it represents
+    # example: Jul 21-27 becomes Jul 21
+movies$Date <- sub("-.*", "-2023", movies$Date)
+movies$Date <- as.Date(movies$Date, format = "%b %d-%Y")
+
+  # change remaining variables
+movies$Tickets.Sold <- as.numeric( gsub("[,]", "", movies$Tickets.Sold) )
+movies$Theaters <- as.numeric( gsub("[,]", "", movies$Theaters) )
+
+```
+
+```{r 3}
+# fix variable names
+colnames(movies) <- c("Overall_Rank", "Movie", "Running_Time", "Total_Gross", "Release_Date", "Distributor", "Opening_Gross", "MPAA", "Genre", "Tickets_Sold", "Budget", "WeekDate", "Weekly_Gross", "Theaters", "Gross_To_Date", "Week")
+
+
+# add missing data
+movies[1786, "Week"] <- 1
+movies[1786, "Weekly_Gross"] <- 1290000
+movies[1786, "Gross_To_Date"] <- 1290000
+movies[1786, "MPAA"] <- "PG-13"
+
+
+# check for missing data
+anyNA(movies$Running_Time)
+anyNA(movies$Total_Gross)
+anyNA(movies$Release_Date)
+anyNA(movies$Distributor)
+anyNA(movies$Opening_Gross) # yes
+anyNA(movies$MPAA) # yes
+anyNA(movies$Genre) 
+anyNA(movies$Tickets_Sold) # yes
+anyNA(movies$Budget) # yes
+anyNA(movies$WeekDate)
+anyNA(movies$Weekly_Gross)
+anyNA(movies$Theaters) # yes
+anyNA(movies$Gross_To_Date)
+anyNA(movies$Week)
+
+# remove any rows with unusual data
+```
+
+
+
