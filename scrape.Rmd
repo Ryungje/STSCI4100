@@ -1,0 +1,378 @@
+---
+title: "BTRY 4110: final project, data scraping"
+author: ""
+date: "2024-04-18"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r libraries}
+# load libraries
+library(rvest)
+library(dplyr)
+library(httr)
+library(stringr)
+```
+
+## Scrape data from boxofficemojo.com
+
+```{r main table}
+# read in main table
+url <- "https://www.boxofficemojo.com/year/2023/?ref_=bo_yl_table_2"
+page <- read_html(url)
+
+# Extract the table
+main_table <- page %>% html_nodes("table") %>% html_table(fill = TRUE)
+main_table <- main_table[[1]]
+
+head(main_table)
+```
+
+
+```{r get weekly tables}
+# Find links for each movie's weekly tables webpage
+
+# extract html content
+response <- GET(url)
+html_content <- content(response, "text")
+messy_info <- substr(html_content, start = 70000, stop = nchar(html_content))
+
+# split html_content by movie movie
+messy_links <- str_split(messy_info, "class=\"a-text-right mojo-header-column mojo-truncate mojo-field-type-rank mojo-sort-column\"")[[1]]
+messy_links <- messy_links[2:201]
+
+# extract the specific link for each movie's webpage
+link_ends <- str_extract(messy_links, '(?<=href=\")[^\"]+')
+movie_links <- paste0("https://www.boxofficemojo.com", link_ends)
+
+# create the link for the weekly webpage for each movie
+weekly_movie_links <- gsub("\\?ref", "weekly/?ref", movie_links)
+
+```
+
+
+```{r extract general info}
+# Extract general info about movie from its webpage and add data to main_table
+
+main_table$Opening <- NA
+main_table$MPAA <- NA
+
+for (i in 1:length(weekly_movie_links)) {
+  response <- GET(weekly_movie_links[i])
+  webpage <- content(response, "text")
+  
+  # income from opening weekend
+  main_table[i, "Opening"] <- str_extract(webpage, 
+                                          '(?<=Opening</span><span><span class=\"money\">)([^<]+)')
+  # initial release date
+  main_table[i, "Release Date"] <- str_extract(webpage, 
+                                               '(?<=Release Date</span><span><a class=\"a-link-normal\" href=\"/date/)([^/]+)')
+  
+  # MPAA rating
+  main_table[i, "MPAA"] <- str_extract(webpage, 
+                                       '(?<=><span>MPAA</span><span>)([^<]+)')
+  
+  # Running Time
+  main_table[i, "Running Time"] <- str_extract(webpage, 
+                                               '(?<=<span>Running Time</span><span>)([^<]+)')
+}
+```
+
+
+```{r extract weekly tables}
+# Extract and read in weekly tables
+
+# Initialize an empty list to store Weekly tables
+weekly_tables_list <- list()
+
+# Loop through each movie link to scrape the Domestic Weekly table
+for (link in weekly_movie_links) {
+  
+  # Read the HTML content of the movie page
+  movie_page <- read_html(link)
+  
+  # Extract the Domestic Weekly table
+  weekly_table <- movie_page %>% html_nodes("table") %>% html_table(fill = TRUE)
+  
+  # coerce data
+  weekly_table[[1]]$Theaters <- as.character(weekly_table[[1]]$Theaters)
+  weekly_table[[1]]$Change <- as.character(weekly_table[[1]]$Change)
+  
+  # Append the table to the list
+  weekly_tables_list <- c(weekly_tables_list, weekly_table)
+  
+}
+
+# Merge each movie's weekly table into a single data frame
+all_weekly_tables <- bind_rows(weekly_tables_list, .id="Rank")
+```
+
+
+# Scrape budgets from numbers.com, and save to csv file
+
+```{r budgets}
+# Get budgets of all movies
+budget_list <- list()
+  
+for(i in 0:64){
+  if (i<1){ url <- "https://www.the-numbers.com/movie/budgets/all" }
+  else{     url <- paste0("https://www.the-numbers.com/movie/budgets/all/", i, "01") }
+  
+  budget_page <- read_html(url)
+
+  budget_table <- budget_page %>% html_nodes("table") %>% html_table(fill = TRUE)
+  budget_table[[1]][,1] <- seq(from = as.integer(paste0(i, "01")), 
+                               to = as.integer(paste0(i, "01")) + (nrow(budget_table[[1]]) - 1), 
+                               by=1)
+  budget_list <- c(budget_list, budget_table)
+}
+
+budgets <- bind_rows(budget_list)
+colnames(budgets)[1] <- "Rank"
+
+#write.csv(budgets, "budget_data_raw.csv")
+```
+
+
+## Scrape supplementary data from:
+## Top Grossing Movies of 2023 from
+## https://www.the-numbers.com/market/2023/top-grossing-movies
+
+```{r new}
+# Scrape main table
+url2 <- "https://www.the-numbers.com/market/2023/top-grossing-movies"
+
+page2 <- read_html(url2)
+
+# Extract the table
+main_table2 <- page2 %>% html_nodes("table") %>% html_table(fill = TRUE)
+main_table2 <- main_table2[[1]]
+main_table2 <- main_table2[-c(582, 583),]
+head(main_table2)
+
+main_table2$Budget <- NA
+```
+
+```{r }
+# obtain full text from main movies page
+url2 <- "https://www.the-numbers.com/market/2023/top-grossing-movies"
+response2 <- GET(url2)
+numbers_page <- content(response2, "text")
+numbers_split <- str_split(numbers_page, "class=\"data\">[\\d]+</td>\n<td><b><a")[[1]]
+numbers_split <- numbers_split[2:225]
+
+# get webpage for each movie
+webpage_start <- "https://www.the-numbers.com"
+webpage_ends <- str_extract(numbers_split, '(?<=href=\")[^"]+')
+movie_webpages <- paste0(webpage_start, webpage_ends)
+
+
+# Get budget information from each movie's webpage
+ # loop takes about 4 minutes to run
+for (i in 1:length(movie_webpages)) {
+  numbers_response <- GET(movie_webpages[i])
+  numbers_content <- content(numbers_response, "text")
+  snip <- substr(numbers_content, start=25000, stop=35000)
+  main_table2$Budget[i] <- str_extract(snip, 
+                 '(?<=Production&nbsp;Budget:</b></td><td>)([^\\s]+)')
+
+  # replace full name of movie
+  if (grepl("…", main_table2$Movie[i])){
+    movie <- str_extract(snip, '(?<=\r\n</script>\r\n\r\n<h1>)([^(]+)')
+    main_table2$Movie[i] <- substr(movie, 1, nchar(movie) - 1)
+  }
+  
+}
+```
+
+# Merge data
+
+## Merge supplementary numbers.com data with boxofficemojo data
+- only top 200 movies in dataset
+
+```{r merging}
+# remove missing, unnecessary, or duplicate variables
+main_table$Estimated <- NULL
+main_table$Genre <- NULL
+main_table$Budget <- NULL
+main_table$Theaters <- NULL
+main_table$Gross <- NULL
+
+main_table2$Distributor <- NULL
+main_table2$`2023 Gross` <- NULL
+main_table2$Rank <- NULL
+
+# rename variables
+colnames(main_table)[2] <- "Movie"
+colnames(main_table2)[2] <- "ReleaseDate_2"
+
+# fix some movie titles
+main_table$Movie[grep("2023\\s+Re.*", main_table$Movie) ] <- sub("2023\\s+Re.*", "", main_table$Movie[grepl("2023\\s+Re.*", main_table$Movie) ])
+main_table$Movie[135] <- sub("30th\\s+Ann.*", "", main_table$Movie[135])
+main_table$Movie[105] <- sub("30th\\s+Ann.*", "", main_table$Movie[105])
+
+
+# fix specific rows in datasets before merging
+main_table2[1:80, "Movie"] <- main_table[1:80, "Movie"]
+main_table2[81, "Movie"] <- main_table$Movie[106]
+main_table2[82:92, "Movie"] <- main_table$Movie[81:91]
+main_table2[99:107, "Movie"] <- main_table$Movie[97:105]
+main_table2[146:152, "Movie"] <- main_table$Movie[145:151]
+main_table2[189:194, "Movie"] <- main_table$Movie[184:189]
+
+# fix titles due to difference in cases
+main_table2$Movie[117] <- main_table$Movie[109]
+main_table2$Movie[110] <- main_table$Movie[110]
+main_table2$Movie[111] <- main_table$Movie[112]
+main_table2$Movie[116] <- main_table$Movie[115]
+main_table2$Movie[122] <- main_table$Movie[121]
+main_table2$Movie[128] <- main_table$Movie[129]
+main_table2$Movie[169] <- main_table$Movie[171]
+main_table2$Movie[173] <- main_table$Movie[178]
+main_table2$Movie[164] <- main_table$Movie[181]
+main_table2$Movie[197] <- main_table$Movie[190]
+
+# fix titles due to syntax differences
+main_table2$Movie[135] <- main_table$Movie[152]
+main_table2$Movie[156] <- main_table$Movie[156]
+main_table2$Movie[176] <- main_table$Movie[169]
+main_table2$Movie[178] <- main_table$Movie[174]
+main_table2$Movie[186] <- main_table$Movie[182]
+
+# merge data
+main <- left_join(main_table, main_table2, by = "Movie")
+```
+
+## Add in any missing data that was missed during web scraping
+
+```{r missing data}
+# fill in missing data for "Coraline"
+temp_response <- GET("https://www.the-numbers.com/movie/Coraline#tab=summary")
+temp_content <- content(temp_response, "text")
+temp_snip <- substr(temp_content, start=27000, stop=36000)
+main[117, "Budget"] <- str_extract(temp_snip, '(?<=Production&nbsp;Budget:</b></td><td>)([^\\s]+)')
+main[117, "Opening"] <- str_extract(temp_snip, "(?<=Opening&nbsp;Weekend:</b></td><td>)([^\\s]+)")
+main[117, "Genre"] <- "Adventure"
+
+
+# budgets are missing for much data
+  # manually researched movie budgets
+
+main[11, "Budget"] <- "$15,000,000"
+main[58, "Budget"] <- "$50,000,000"
+main[26, "Budget"] <- "$12,000,000"
+main[28, "Budget"] <- "$70,000,000"
+main[29, "Budget"] <- "$38,500,000"
+main[36, "Budget"] <- "$200,000,000"
+main[40, "Budget"] <- "$30,000,000"
+main[47, "Budget"] <- "$90,000,000"
+main[52, "Budget"] <- "$60,000,000"
+main[53, "Budget"] <- "$100,000,000"
+main[54, "Budget"] <- "$35,000,000"
+main[55, "Budget"] <- "$60,000,000"
+main[60, "Budget"] <- "$200,000,000"
+main[61, "Budget"] <- "$7,000,000"
+main[62, "Budget"] <- "$25,000,000"
+main[65, "Budget"] <- "$18,000,000"
+main[66, "Budget"] <- "$25,000,000"
+main[70, "Budget"] <- "$40,000,000"
+main[74, "Budget"] <- "$74,000,000"
+main[75, "Budget"] <- "$5,000,000"
+main[76, "Budget"] <- "$20,000,000"
+main[77, "Budget"] <- "$28,000,000"
+main[81, "Budget"] <- "$55,000,000"
+main[86, "Budget"] <- "$36,000,000"
+main[88, "Budget"] <- "$24,000,000"
+main[91, "Budget"] <- "$32,000,000"
+main[94, "Budget"] <- "$29,000,000"
+main[95, "Budget"] <- "$11,300,000"
+main[96, "Budget"] <- "$6,400,000"
+main[97, "Budget"] <- "$40,000,000"
+main[98, "Budget"] <- "$75,000,000"
+main[100, "Budget"] <- "$6,000,000"
+main[103, "Budget"] <- "$45,000,000"
+main[104, "Budget"] <- "$35,000,000"
+main[105, "Budget"] <- "$18,000,000"
+
+main[108, "Budget"] <- "$10,000,000"
+main[110, "Budget"] <- "$32,000,000"
+main[111, "Budget"] <- "$30,000,000"
+main[114, "Budget"] <- "$6,000,000"
+main[116, "Budget"] <- "$15,000,000"
+main[118, "Budget"] <- "$12,700,000"
+main[124, "Budget"] <- "$9,000,000"
+main[125, "Budget"] <- "$10,000,000"
+main[126, "Budget"] <- "$40,000,000"
+
+main[127, "Budget"] <- "$18,000,000"
+main[128, "Budget"] <- "$3,000,000"
+main[130, "Budget"] <- "$1,500,000"
+main[131, "Budget"] <- "$36,000,000"
+main[133, "Budget"] <- "$40,000,000"
+main[134, "Budget"] <- "$4,500,000"
+main[136, "Budget"] <- "$25,000,000"
+main[137, "Budget"] <- "$30,000,000"
+main[138, "Budget"] <- "$29,000,000"
+main[140, "Budget"] <- "$65,000,000"
+main[141, "Budget"] <- "$1,200,000"
+main[142, "Budget"] <- "$20,000,000"
+main[143, "Budget"] <- "$17,000,000"
+main[144, "Budget"] <- "$12,000,000"
+main[185, "Budget"] <- "$7,500,000"
+main[186, "Budget"] <- "$15,000,000"
+main[187, "Budget"] <- "$500,000"
+main[193, "Budget"] <- "$3,500,000"
+main[196, "Budget"] <- "$7,500,000"
+main[67, "Budget"] <- "$45,000,000"
+main[155, "Budget"] <- "$3,000,000"
+main[157, "Budget"] <- "$10,000,000"
+main[162, "Budget"] <- "$9,500,000"
+main[145, "Budget"] <- "$5,000,000"
+main[146, "Budget"] <- "$31,500,000"
+main[147, "Budget"] <- "$6,200,000"
+main[148, "Budget"] <- "$10,000,000"
+main[150, "Budget"] <- "$35,000,000"
+main[151, "Budget"] <- "$41,000,000"
+main[152, "Budget"] <- "$88,500,000"
+main[168, "Budget"] <- "$19,000,000"
+main[171, "Budget"] <- "$50,000"
+main[173, "Budget"] <- "$9,500,000"
+main[174, "Budget"] <- "$137,000,000"
+main[175, "Budget"] <- "$10,000,000"
+main[176, "Budget"] <- "$20,000,000"
+main[180, "Budget"] <- "$1,300,000"
+main[181, "Budget"] <- "$5,000,000"
+main[183, "Budget"] <- "$8,000,000"
+main[184, "Budget"] <- "$16,000,000"
+main[190, "Budget"] <- "$25,000,000"
+main[191, "Budget"] <- "$12,000,000"
+main[195, "Budget"] <- "$4,100,000"
+
+# missing budgets for many movies
+nrow(main[which(is.na(main$Budget)),])
+```
+
+## Merge main data with the weekly tables data
+
+
+```{r merge}
+# remove unnecessary variables
+all_weekly_tables$Weekend...3 <- NULL
+all_weekly_tables$Weekend...9 <- NULL
+
+
+# merge main table with weekly tables
+full_data <- merge(main, all_weekly_tables, by = "Rank")
+colnames(full_data)[1] <- "Overall Rank"
+
+# remove unneccessary variables
+full_data <- full_data[,-c(15, 17, 18, 21)]
+
+write.csv(full_data, "movies_raw.csv")
+```
+
+
+
