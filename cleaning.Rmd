@@ -66,19 +66,19 @@ movies[1787, "MPAA"] <- "PG-13"
 
 
 # Fill in missing Opening_Gross data
-movies$Opening_Gross[c(1531:1538 )] <- 3006525
-movies$Opening_Gross[c(1609:1611)] <- 973795
+movies$Opening_Gross[1531:1538] <- 3006525
+movies$Opening_Gross[1609:1611] <- 973795
 movies$Opening_Gross[1897] <- 1176085
 
 # Fill in missing MPAA data 
 movies$MPAA[which(is.na(movies$MPAA))] <- "Not Rated"
-movies$MPAA[c(1365,1366)] <- "PG" #TV equivalent of PG 
-movies$MPAA[c(1650,1651)] <- "R"
-movies$MPAA[c(1790:1827)] <- "PG"
+movies$MPAA[1365:1366] <- "PG" #TV equivalent of PG 
+movies$MPAA[1650:1651] <- "R"
+movies$MPAA[1790:1827] <- "PG"
 
 #Fill in missing Theaters data
 movies$Theaters[1693:1698] <- 62
-movies$Theaters[c(1715,1716)] <- c(1175, 925)
+movies$Theaters[1715:1716] <- c(1175, 925)
 
 #Fill in missing Genre data
 movies$Genre[1467:1475] <- "Adventure"
@@ -113,14 +113,34 @@ anyNA(movies$Week)
 
 # remove any rows with unusual data
 ```
+```{r}
+# Fill in missing Distributor data 
+movies$Distributor[206:218] <- "AMC Theatres Distribution"
+movies$Distributor[616:624] <- "Amazon Studios"
+movies$Distributor[655:663] <- "Toho International"
+movies$Distributor[743:748] <- "AMC Theatres Distribution"
+movies$Distributor[834:845] <- "Amazon MGM Studios"
+movies$Distributor[1000:1008] <- "Moksha Movies"
+movies$Distributor[1263:1268] <- "Prathyangira Cinemas"
+movies$Distributor[1292] <- "20th Century Fox"
+movies$Distributor[1442:1462] <- "Cinecom"
+movies$Distributor[1494] <- "Zee Studios"
+movies$Distributor[1495:1516] <- "Neon"
+movies$Distributor[1683:1689] <- "Tartan Films"
+movies$Distributor[1715:1716] <- "Falling Forward Films"
+movies$Distributor[1768:1772] <- "Neon"
+movies$Distributor[1932:1935] <- "Sony Pictures"
+
+```
 
 ```{r}
 # scratch code (delete later)
 View(movies)
 
-
+# Both these have no available data online
 which(is.na(movies$Tickets_Sold))
 which(is.na(movies$Budget))
+
 which(movies$Distributor=="-")
 movies[616,]
 ```
