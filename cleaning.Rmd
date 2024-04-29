@@ -59,32 +59,16 @@ colnames(movies) <- c("Overall_Rank", "Movie", "Running_Time", "Total_Gross", "R
 
 
 # add missing data
-movies[1786, "Week"] <- 1
-movies[1786, "Weekly_Gross"] <- 1290000
-movies[1786, "Gross_To_Date"] <- 1290000
-movies[1786, "MPAA"] <- "PG-13"
+movies[1787, "Week"] <- 1
+movies[1787, "Weekly_Gross"] <- 1290000
+movies[1787, "Gross_To_Date"] <- 1290000
+movies[1787, "MPAA"] <- "PG-13"
 
-
-# check for missing data
-anyNA(movies$Running_Time)
-anyNA(movies$Total_Gross)
-anyNA(movies$Release_Date)
-anyNA(movies$Distributor)
-anyNA(movies$Opening_Gross) # yes
-anyNA(movies$MPAA) # yes
-anyNA(movies$Genre) 
-anyNA(movies$Tickets_Sold) # yes
-anyNA(movies$Budget) # yes
-anyNA(movies$WeekDate)
-anyNA(movies$Weekly_Gross)
-anyNA(movies$Theaters) # yes
-anyNA(movies$Gross_To_Date)
-anyNA(movies$Week)
 
 # Fill in missing Opening_Gross data
-movies$Opening_Gross[c(1531,1532,1533,1534,1535,1536,1537)] <- 3006525
-movies$Opening_Gross[c(1609,1610)] <- 973795
-movies$Opening_Gross[1858] <- 1176085
+movies$Opening_Gross[c(1531:1538 )] <- 3006525
+movies$Opening_Gross[c(1609:1611)] <- 973795
+movies$Opening_Gross[1897] <- 1176085
 
 # Fill in missing MPAA data 
 movies$MPAA[which(is.na(movies$MPAA))] <- "Not Rated"
@@ -93,8 +77,32 @@ movies$MPAA[c(1650,1651)] <- "R"
 movies$MPAA[c(1790:1827)] <- "PG"
 
 #Fill in missing Theaters data
-movies$Theaters[1693:1697] <- 62
-movies$Theaters[c(1714,1715)] <- c(1175, 925)
+movies$Theaters[1693:1698] <- 62
+movies$Theaters[c(1715,1716)] <- c(1175, 925)
+
+#Fill in missing Genre data
+movies$Genre[1467:1475] <- "Adventure"
+movies$Genre[1631:1641] <- "Comedy"
+movies$Genre[1653:1660] <- "Comedy"
+movies$Genre[1683:1689] <- "Action"
+movies$Genre[1742:1749] <- "Drama"
+
+
+# check for missing data
+anyNA(movies$Running_Time)
+anyNA(movies$Total_Gross)
+anyNA(movies$Release_Date)
+anyNA(movies$Distributor)
+anyNA(movies$Opening_Gross)
+anyNA(movies$MPAA)
+anyNA(movies$Genre)
+anyNA(movies$Tickets_Sold) # yes
+anyNA(movies$Budget) # yes
+anyNA(movies$WeekDate)
+anyNA(movies$Weekly_Gross)
+anyNA(movies$Theaters)
+anyNA(movies$Gross_To_Date)
+anyNA(movies$Week)
 
 # remove any rows with unusual data
 ```
@@ -103,10 +111,11 @@ movies$Theaters[c(1714,1715)] <- c(1175, 925)
 # scratch code (delete later)
 View(movies)
 
+which(is.na(movies$Theaters))
 which(is.na(movies$Tickets_Sold))
 which(is.na(movies$Budget))
-
-
+which(movies$Distributor=="-")
+movies[616,]
 ```
 
 
