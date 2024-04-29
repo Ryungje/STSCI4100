@@ -90,6 +90,9 @@ movies$Genre[1742:1749] <- "Drama"
 #Fill in missing Tickets_Sold data
 movies$Tickets_Sold[1467:1475] <- 133580
 movies$Tickets_Sold[1631:1641] <- 198221
+movies$Tickets_Sold[1653:1660] <- 178564
+movies$Tickets_Sold[1683:1689] <- 162404
+movies$Tickets_Sold[1742:1749] <- 139147
 
 
 # check for missing data
