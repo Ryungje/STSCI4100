@@ -81,8 +81,26 @@ anyNA(movies$Theaters) # yes
 anyNA(movies$Gross_To_Date)
 anyNA(movies$Week)
 
+# Fill in missing Opening_Gross data
+movies$Opening_Gross[c(1531,1532,1533,1534,1535,1536,1537)] <- 3006525
+movies$Opening_Gross[c(1609,1610)] <- 973795
+movies$Opening_Gross[1858] <- 1176085
+
 # remove any rows with unusual data
 ```
 
+```{r}
+# scratch code (delete later)
+View(movies)
+
+which(is.na(movies$MPAA))
+which(is.na(movies$Tickets_Sold))
+which(is.na(movies$Budget))
+which(is.na(movies$Theaters))
+
+movies[911,]
+
+
+```
 
 
