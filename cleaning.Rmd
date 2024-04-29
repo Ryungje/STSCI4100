@@ -11,6 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r 1}
 library(stringr)
+library(dplyr)
 # READ IN DATA
 movies_raw <- read.csv("movies_raw.csv", row.names = 1 )
 movies <- movies_raw
