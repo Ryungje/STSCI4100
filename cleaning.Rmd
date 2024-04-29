@@ -92,6 +92,9 @@ movies$MPAA[c(1365,1366)] <- "PG" #TV equivalent of PG
 movies$MPAA[c(1650,1651)] <- "R"
 movies$MPAA[c(1790:1827)] <- "PG"
 
+#Fill in missing Theaters data
+movies$Theaters[1693:1697] <- 62
+movies$Theaters[c(1714,1715)] <- c(1175, 925)
 
 # remove any rows with unusual data
 ```
@@ -102,7 +105,7 @@ View(movies)
 
 which(is.na(movies$Tickets_Sold))
 which(is.na(movies$Budget))
-which(is.na(movies$Theaters))
+
 
 ```
 
