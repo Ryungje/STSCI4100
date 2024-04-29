@@ -87,6 +87,10 @@ movies$Genre[1653:1660] <- "Comedy"
 movies$Genre[1683:1689] <- "Action"
 movies$Genre[1742:1749] <- "Drama"
 
+#Fill in missing Tickets_Sold data
+movies$Tickets_Sold[1467:1475] <- 133580
+movies$Tickets_Sold[1631:1641] <- 198221
+
 
 # check for missing data
 anyNA(movies$Running_Time)
@@ -111,7 +115,7 @@ anyNA(movies$Week)
 # scratch code (delete later)
 View(movies)
 
-which(is.na(movies$Theaters))
+
 which(is.na(movies$Tickets_Sold))
 which(is.na(movies$Budget))
 which(movies$Distributor=="-")
