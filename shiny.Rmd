@@ -1,31 +1,61 @@
 ```{r}
+# Import movie data
+
+movies <- load("movieData.RData")
+```
+
+
+```{r}
+# Plotting functions for use in Server Controls
+
 library(ggplot2)
 
-bar_plot_Distributor = function(){
 
-  # get top 10 Distributors
+plotDistributor = function(plotthis) {
+  ## Plotting top 10 Movie Distributors
+  
+    # sort top Distributors
   temp <- tail(sort(table(movies$Distributor), decreasing=FALSE), n=10)
   temp <- data.frame(temp)
   names(temp) <- c("Distributor", "Frequency")
   
+    # plot box plot
   ggplot(data=temp, aes(Distributor, Frequency)) + geom_col() + coord_flip()
-
 }
 
 
+plotBudget = function(plotthis){
+  ## Plotting top 10 Movie Budgets
+
+  
+}
+
+
+```
+
+
+```{r}
+# Shiny App 
+
+
+# Shiny App UI
 ui <- page_navbar(
   title = "Top Grossing Movies of 2023",
   inverse = TRUE,
   
-  nav_panel(title = "One", p("First page content.")),
-  nav_panel(title = "Two", p("Second page content.")),
-  nav_panel(title = "Three", p("Third page content.")),
+    # Interactive panels 
+  navset_card_underline(
+    nav_panel("Top Distributors", plotOutput("dist")),
+    nav_panel("Biggest Budgets", plotOutput("budget")),
+    nav_panel("EMPTY", plotOutput("EMPTY"))
+  ),
   
   nav_spacer(),
   
   nav_menu(
     title = "Links",
     align = "right",
+      # Links to source data
     nav_item(tags$a("2023 Domestic Box Office", href = "https://www.boxofficemojo.com/year/2023/?ref_=bo_yl_table_2")),
     nav_item(tags$a("Supplemental Data", href = "https://www.the-numbers.com/market/2023/top-grossing-movies"))
   )
@@ -33,12 +63,20 @@ ui <- page_navbar(
 
 
 server <- function(input, output) {
-  output$coef <- renderPlot(
-    plotcoef(input$thisvar)
+  ## Shiny App Server Controls
+
+  output$dist <- renderPlot(
+    plotDistributor(input$thisvar)
   )
+  
+  output$budget <- renderPlot(
+    plotBudget(input$thisvar)
+  )
+  
 }
 
 shinyApp(ui, server)
+
 
 ```
 

@@ -142,8 +142,8 @@ movies <- movies[-c(1296, 1297), ] #Removing movie Coraline
 
 
 # save movies as file
-save(movies, file="movieData.RData")
-
+save(movies, file="movies.RData")
+load("movies.RData")
 ```
 
 
