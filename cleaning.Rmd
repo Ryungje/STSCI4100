@@ -17,6 +17,7 @@ movies_raw <- read.csv("movies_raw.csv", row.names = 1 )
 movies <- movies_raw
 ```
 
+
 ## Clean Data
 
 
@@ -103,7 +104,7 @@ anyNA(movies$Distributor)
 anyNA(movies$Opening_Gross)
 anyNA(movies$MPAA)
 anyNA(movies$Genre)
-anyNA(movies$Tickets_Sold) # yes
+anyNA(movies$Tickets_Sold)
 anyNA(movies$Budget) # yes
 anyNA(movies$WeekDate)
 anyNA(movies$Weekly_Gross)
@@ -111,8 +112,9 @@ anyNA(movies$Theaters)
 anyNA(movies$Gross_To_Date)
 anyNA(movies$Week)
 
-# remove any rows with unusual data
 ```
+
+
 ```{r}
 # Fill in missing Distributor data 
 movies$Distributor[206:218] <- "AMC Theatres Distribution"
@@ -134,15 +136,17 @@ movies$Distributor[1932:1935] <- "Sony Pictures"
 ```
 
 ```{r}
+
+# remove any rows with unusual data
+movies <- movies[-c(1296, 1297), ] #Removing movie Coraline
+
+
 # scratch code (delete later)
 View(movies)
 
 # Both these have no available data online
-which(is.na(movies$Tickets_Sold))
 which(is.na(movies$Budget))
 
-which(movies$Distributor=="-")
-movies[616,]
 ```
 
 
