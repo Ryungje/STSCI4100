@@ -140,10 +140,8 @@ movies$Distributor[1932:1935] <- "Sony Pictures"
 # remove any rows with unusual data
 movies <- movies[-c(1296, 1297), ] #Removing movie Coraline
 
-
-# save movies as file
+# save movies as .RData file
 save(movies, file="movies.RData")
-load("movies.RData")
 ```
 
 

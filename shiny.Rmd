@@ -26,7 +26,6 @@ plotDistributor = function(plotthis) {
 
 plotBudget = function(plotthis){
   ## Plotting top 10 Movie Budgets
-
   
 }
 
@@ -83,15 +82,6 @@ shinyApp(ui, server)
 
 ```{r}
 # Scratch Code
-
-library(ggplot2)
-
-# get top 10 Distributors
-temp <- tail(sort(table(movies$Distributor), decreasing=FALSE), n=10)
-temp <- data.frame(temp)
-names(temp) <- c("Distributor", "Frequency")
-
-ggplot(data=temp, aes(Distributor, Frequency)) + geom_col() + coord_flip()
 
 ```
 
