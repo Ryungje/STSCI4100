@@ -1,13 +1,28 @@
 ```{r}
-ui <- page_sidebar(
+
+ui <- page_navbar(
+  title = "Top Grossing Movies of 2023",
+  inverse = TRUE,
   
+  nav_panel(title = "One", p("First page content.")),
+  nav_panel(title = "Two", p("Second page content.")),
+  nav_panel(title = "Three", p("Third page content.")),
+  
+  nav_spacer(),
+  
+  nav_menu(
+    title = "Links",
+    align = "right",
+    nav_item(tags$a("2023 Domestic Box Office", href = "https://www.boxofficemojo.com/year/2023/?ref_=bo_yl_table_2")),
+    nav_item(tags$a("Supplemental Data", href = "https://www.the-numbers.com/market/2023/top-grossing-movies"))
+  )
 )
 
 
-server <- function(input, output) {
+server <- function(...) { } # not used in this example
 
-}
 
-shinyApp(ui = ui, server = server)
+shinyApp(ui, server)
+
 ```
 
