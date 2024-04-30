@@ -1,4 +1,17 @@
 ```{r}
+library(ggplot2)
+
+bar_plot_Distributor = function(){
+
+  # get top 10 Distributors
+  temp <- tail(sort(table(movies$Distributor), decreasing=FALSE), n=10)
+  temp <- data.frame(temp)
+  names(temp) <- c("Distributor", "Frequency")
+  
+  ggplot(data=temp, aes(Distributor, Frequency)) + geom_col() + coord_flip()
+
+}
+
 
 ui <- page_navbar(
   title = "Top Grossing Movies of 2023",
@@ -19,10 +32,28 @@ ui <- page_navbar(
 )
 
 
-server <- function(...) { } # not used in this example
-
+server <- function(input, output) {
+  output$coef <- renderPlot(
+    plotcoef(input$thisvar)
+  )
+}
 
 shinyApp(ui, server)
+
+```
+
+
+```{r}
+# Scratch Code
+
+library(ggplot2)
+
+# get top 10 Distributors
+temp <- tail(sort(table(movies$Distributor), decreasing=FALSE), n=10)
+temp <- data.frame(temp)
+names(temp) <- c("Distributor", "Frequency")
+
+ggplot(data=temp, aes(Distributor, Frequency)) + geom_col() + coord_flip()
 
 ```
 
