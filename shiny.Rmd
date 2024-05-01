@@ -20,13 +20,16 @@ plotDistributor = function(plotthis) {
   names(temp) <- c("Distributor", "Frequency")
   
     # plot box plot
-  ggplot(data=temp, aes(Distributor, Frequency)) + geom_col() + coord_flip()\
+  ggplot(data=temp, aes(Distributor, Frequency)) + geom_col() + coord_flip()
 }
 
 
 plotBudget = function(plotthis){
-  ## Plotting top 10 Movie Budgets
-  plot(1,1)
+  
+  
+  
+  
+  
 }
 
 
@@ -80,8 +83,23 @@ shinyApp(ui, server)
 ```
 
 
+
 ```{r}
 # Scratch Code
 
+
+# Average Running Time
+mean(unique(movies$Running_Time))
+
+
 ```
+
+
+
+
+
+
+
+
+
 

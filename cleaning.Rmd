@@ -115,7 +115,7 @@ anyNA(movies$Week)
 ```
 
 
-```{r}
+```{r 4}
 # Fill in missing Distributor data 
 movies$Distributor[206:218] <- "AMC Theatres Distribution"
 movies$Distributor[616:624] <- "Amazon Studios"
@@ -133,15 +133,56 @@ movies$Distributor[1715:1716] <- "Falling Forward Films"
 movies$Distributor[1768:1772] <- "Neon"
 movies$Distributor[1932:1935] <- "Sony Pictures"
 
-```
-
-```{r}
-
 # remove any rows with unusual data
 movies <- movies[-c(1296, 1297), ] #Removing movie Coraline
 
 # save movies as .RData file
 save(movies, file="movies.RData")
+
+```
+
+```{r 5}
+
+parse_data <- function(category){
+  ## Parse movie data for individual categories
+
+    # Create new data frame with each movie title and empty column
+  movie_titles <- unique(movies$Movie)
+  
+  movie_category <- data.frame(Movie=movie_titles)
+  movie_category <- cbind(movie_category, NA)
+  names(movie_category) <- c("Movie", category)
+  
+    # Fill in data for each movie for given category
+  for (i in 1:length(movies$Movie)){
+    n <- which(movie_category$Movie == movies$Movie[i])
+    
+      # See if this movie title has category data already
+    if ( is.na(movie_category[[category]][n])){
+      movie_category[[category]][n] <- movies[[category]][i]  
+    }
+  }
+  
+  return(movie_category)
+}
+
+
+## Create simplified movie dataframe
+## Excludes Release_Date, WeekDate, Weekly_Gross, Gross_To_Date, and Week
+simple_movies <- data.frame(Movie = unique(movies$Movie),
+                            Overall_Rank = parse_data("Overall_Rank")[[2]],
+                            Running_Time = parse_data("Running_Time")[[2]],
+                            Total_Gross = parse_data("Total_Gross")[[2]],
+                            Distributor = parse_data("Distributor")[[2]],
+                            Opening_Gross = parse_data("Opening_Gross")[[2]],
+                            MPAA = parse_data("MPAA")[[2]],
+                            Genre = parse_data("Genre")[[2]],
+                            Tickets_Sold = parse_data("Tickets_Sold")[[2]],
+                            Budget = parse_data("Budget")[[2]],
+                            Theaters = parse_data("Theaters")[[2]]
+                            )
+
+#save(simple_movies, file = "simple_movies.RData")
 ```
 
 
