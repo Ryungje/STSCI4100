@@ -1,15 +1,19 @@
 ```{r}
+library("shiny")
+library("ggplot2")
+library("bslib")
+library("DT")
+
+
 # Import movie data
 
 load("movies.RData")
+load("simple_movies.RData")
 ```
 
 
 ```{r}
 # Plotting functions for use in Server Controls
-library("shiny")
-library("ggplot2")
-library("bslib")
 
 plotDistributor = function(plotthis) {
   ## Plotting top 10 Movie Distributors
@@ -17,19 +21,15 @@ plotDistributor = function(plotthis) {
     # sort top Distributors
   temp <- tail(sort(table(movies$Distributor), decreasing=FALSE), n=10)
   temp <- data.frame(temp)
-  names(temp) <- c("Distributor", "Frequency")
+  names(temp) <- c("Distributor", "Movies_Released")
   
     # plot box plot
-  ggplot(data=temp, aes(Distributor, Frequency)) + geom_col() + coord_flip()
+  ggplot(data=temp, aes(Distributor, Movies_Released)) + geom_col() + coord_flip()
 }
 
 
-plotBudget = function(plotthis){
-  
-  
-  
-  
-  
+plotBasic = function(plotthis){
+  simple_movies
 }
 
 
@@ -47,10 +47,12 @@ ui <- page_navbar(
   
     # Interactive panels 
   navset_card_underline(
+    nav_panel("Basic Movie Information", 
+              tabPanel("", DTOutput("basic")
+                       ),
+              ),
     nav_panel("Top Distributors", plotOutput("dist")),
-    nav_panel("Biggest Budgets", plotOutput("budget")),
-    nav_panel("EMPTY", plotOutput("EMPTY"))
-  ),
+    ),
   
   nav_spacer(),
   
@@ -60,20 +62,29 @@ ui <- page_navbar(
       # Links to source data
     nav_item(tags$a("2023 Domestic Box Office", href = "https://www.boxofficemojo.com/year/2023/?ref_=bo_yl_table_2")),
     nav_item(tags$a("Supplemental Data", href = "https://www.the-numbers.com/market/2023/top-grossing-movies"))
-  )
+  ),
+  nav_menu(
+    title = "Authors",
+    align = "right",
+    nav_item("Ilona Khimey"), 
+    nav_item("James Chun"),
+    nav_item("Andrew Zhang")
+  ),
+  fluid=TRUE
 )
 
 
 server <- function(input, output) {
   ## Shiny App Server Controls
 
+  output$basic <- renderDT(
+    plotBasic(input$thisvar)
+  )
+
   output$dist <- renderPlot(
     plotDistributor(input$thisvar)
   )
   
-  output$budget <- renderPlot(
-    plotBudget(input$thisvar)
-  )
   
 }
 
@@ -90,7 +101,6 @@ shinyApp(ui, server)
 
 # Average Running Time
 mean(unique(movies$Running_Time))
-
 
 ```
 
