@@ -1,15 +1,15 @@
 ```{r}
 # Import movie data
 
-movies <- load("movieData.RData")
+load("movies.RData")
 ```
 
 
 ```{r}
 # Plotting functions for use in Server Controls
-
-library(ggplot2)
-
+library("shiny")
+library("ggplot2")
+library("bslib")
 
 plotDistributor = function(plotthis) {
   ## Plotting top 10 Movie Distributors
@@ -20,13 +20,13 @@ plotDistributor = function(plotthis) {
   names(temp) <- c("Distributor", "Frequency")
   
     # plot box plot
-  ggplot(data=temp, aes(Distributor, Frequency)) + geom_col() + coord_flip()
+  ggplot(data=temp, aes(Distributor, Frequency)) + geom_col() + coord_flip()\
 }
 
 
 plotBudget = function(plotthis){
   ## Plotting top 10 Movie Budgets
-  
+  plot(1,1)
 }
 
 
