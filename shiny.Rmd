@@ -37,13 +37,15 @@ plotDistributor = function(plotthis) {
     # plot box plot
   ggplot(data=temp, aes(Distributor, Movies_Released)) + geom_col() + coord_flip()
 }
+```
 
-
-plotBasic = function(plotthis){
+``` {r}
+plotBasic = function(){
   simple_movies
 }
+```
 
-
+``` {r}
 plotKMeans = function(plotthis){
   
   sm_tib<-as_tibble(simple_movies)
@@ -72,6 +74,46 @@ plotKMeans = function(plotthis){
 
 ```
 
+```{r}
+
+plotGrossBudget = function(){
+  # plot with gross profits  vs budget
+  model <- lm(log(Total_Gross) ~ log(Budget), data=simple_movies)
+  
+  #TO DO Display: For every 1% increase in budget, profirs increase by 0.6%
+  #model$coefficients[2]
+  
+  ggplot() + 
+    geom_point(data=simple_movies, aes(x= log(Budget), y=log(Total_Gross), col=Overall_Rank)) +
+    geom_abline(slope = 1, intercept = 0, color = "red", linetype = "dashed") + 
+    geom_abline(slope = model$coefficients[2], intercept = model$coefficients[1], color = "deeppink") + 
+    xlab("Log of Budgets (in dollars)") + 
+    ylab("Log of Total Gross Profits (in dollars)") + 
+    ggtitle("Gross Profits vs Budget") +
+    geom_text(aes(x = 9.8, y = 20, label = "x=y"), col="red") + 
+    scale_color_gradient(low = "blue", high = "yellow")
+  
+}
+  
+```
+
+```{r 2}
+
+plotRankBudget = function(){  
+  # plot with budget vs rank
+  model2 <- lm(Budget~Overall_Rank, data = simple_movies)
+  
+  # TO DO Display this: To decrease 1 unit in rank (lower rank is better), budget increases by approximately $745,000
+  #-model2$coefficients[2]
+  
+  ggplot() + 
+    geom_point(data=simple_movies, aes(x= Overall_Rank, y=Budget/1000000)) +
+    geom_abline(slope = -model2$coefficients[2]/1000000, intercept = model2$coefficients[1]/1000000, color = "blue") + 
+    xlab("Rank") + 
+    ylab("Budget (in millions of dollars)") + ggtitle("Budget vs Rank") + 
+    scale_x_reverse() 
+}
+```
 
 ```{r}
 # Shiny App 
@@ -96,7 +138,7 @@ ui <- page_navbar(
                     "Using Genre as Categorical Variable"
                   ),
                   selectInput(
-                    "var",
+                    "kmeans",
                     label = "Choose K",
                     choices = 
                       list(
@@ -106,7 +148,26 @@ ui <- page_navbar(
                       )
                   )
                 ),
-                plotOutput("selected_var")
+                plotOutput("kmeans")
+              )
+              ),
+    nav_panel("Budget Plots", 
+              page_sidebar(
+                sidebar = sidebar(
+                  helpText(
+                    "Addional Exploratory Plots Based On Budget Data"
+                  ),
+                  selectInput(
+                    "budget",
+                    label = "Choose Category to Compare With Budget",
+                    choices = 
+                      list(
+                        "Total Gross",
+                        "Rank"
+                      )
+                  )
+                ),
+                plotOutput("budget")
               )
               )
     ),
@@ -135,15 +196,25 @@ server <- function(input, output) {
   ## Shiny App Server Controls
 
   output$basic <- renderDT(
-    plotBasic(input$thisvar)
+    plotBasic()
   )
 
   output$dist <- renderPlot(
-    plotDistributor(input$thisvar)
+    plotDistributor()
   )
   
-  output$selected_var <- renderPlot({
-    plotKMeans(input$var)
+  output$kmeans <- renderPlot({
+    plotKMeans(input$kmeans)
+  })
+  
+  output$budget <- renderPlot({
+    if (input$budget == "Total Gross"){
+      print("HELLO")
+      plotGrossBudget() 
+    }
+    else if (input$budget == "Rank"){
+      plotRankBudget()
+    }
   })
 }
 
@@ -153,49 +224,6 @@ shinyApp(ui, server)
 ```
 
 
-
-```{r}
-# Scratch Code
-
-
-# Average Running Time
-#mean(unique(movies$Running_Time))
-
-```
-
-
-
-```{r}
-# plot with gross profits  vs budget
-model <- lm(log(Total_Gross) ~ log(Budget), data=simple_movies)
-
-ggplot() + 
-  geom_point(data=simple_movies, aes(x= log(Budget), y=log(Total_Gross), col=Overall_Rank)) +
-  geom_abline(slope = 1, intercept = 0, color = "red", linetype = "dashed") + 
-  geom_abline(slope = model$coefficients[2], intercept = model$coefficients[1], color = "deeppink") + 
-  xlab("Log of Budgets (in dollars)") + 
-  ylab("Log of Total Gross Profits (in dollars)") + 
-  ggtitle("Gross Profits vs Budget") +
-  geom_text(aes(x = 9.8, y = 20, label = "x=y"), col="red") + 
-  scale_color_gradient(low = "blue", high = "yellow")
-
-# Display: For every 1% increase in budget, profirs increase by 0.6%
-model$coefficients[2]
-```
-```{r 2}
-# plot with budget vs rank
-model2 <- lm(Budget~Overall_Rank, data = simple_movies)
-
-ggplot() + 
-  geom_point(data=simple_movies, aes(x= Overall_Rank, y=Budget/1000000)) +
-  geom_abline(slope = -model2$coefficients[2]/1000000, intercept = model2$coefficients[1]/1000000, color = "blue") + 
-  xlab("Rank") + 
-  ylab("Budget (in millions of dollars)") + ggtitle("Budget vs Rank") + 
-  scale_x_reverse() 
-
-#Display this: To decrease 1 unit in rank (lower rank is better), budget increases by approximately $745,000
--model2$coefficients[2]
-```
 
 
 
