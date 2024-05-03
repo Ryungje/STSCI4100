@@ -10,49 +10,92 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r}
+---
+title: "KNN-K_means-MovieData-Code"
+author: "az296"
+date: "2024-05-02"
+output: html_document
+header-includes:
+- \usepackage{fvextra}
+- \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\{\}}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE, silent=TRUE)
+options(dplyr.summarise.inform = FALSE)
+```
+
+```{r}
+#K-Means Clustering on Movies Dataset 
+library(dplyr)
+load(r"[C:\Users\andre\Desktop\Cornell\Senior Spring\BTRY4100\Final_Project\simple_movies.RData]")
+sm_tib<-as_tibble(simple_movies)
+continous_numeric_cols <- c(5,7,8)
+
+#Standardization of continous numeric data in our movies dataset 
+for (i in 1:length(names(sm_tib))){
+  if(class(sm_tib[names(sm_tib)[i]][[1]]) %in% c("integer","numeric")){
+    continous_numeric_cols<-c(continous_numeric_cols,i)
+  }
+}
+sm_tib_k <- sm_tib[,continous_numeric_cols]
+sm_tib_k <- sm_tib_k[c(-8,-9)]
+for (i in 4:(length(sm_tib_k))){
+  sm_tib_k[,i] <- (sm_tib_k[,i]-mean(sm_tib_k[,i][[1]]))/sd(sm_tib_k[,i][[1]])
+}
+
+#We choose K to be the genres of movies, which is a reasonable categorical variable for which our movies might be sorted into.
+clustering <- kmeans(sm_tib_k[,4:7], 13)
+sm_tib_k$cluster<-clustering$cluster
+
+#Since our 13 clusters do not correspond well with Genre, we can now explore the clusters of
+clustering <- kmeans(sm_tib_k[,4:7], 4)
+sm_tib_k$cluster<-clustering$cluster
+
+  #There seems to be some rough correspondence with roughly Group 1 being mostly Non-Rated movies. Group 2 & Group 3 having mostly PG-13 movies, and Group 4 having mostly rated R movies.
+
+#Note that there does not seem to be any relationship between the generated k-means groups and our film distributor data 
+clustering <- kmeans(sm_tib_k[,4:7], 56)
+sm_tib_k$cluster<-clustering$cluster
+
+
+
 #K-Nearest Neighbors Algorithm On Movies DataSet (az296)
 
-#
-
-#First We Set Up the Merge for our red and white wine datasets
-
-df_red <- read.csv("C:/Users/andre/Desktop/Cornell/Senior Fall/BTRY4740/Final Project/wine+quality/winequality-red.csv", sep = ";")
-df_red["Wine_Type"] <- "red"
-df_white <- read.csv("C:/Users/andre/Desktop/Cornell/Senior Fall/BTRY4740/Final Project/wine+quality/winequality-white.csv", sep = ";")
-df_white["Wine_Type"] <- "white"
-wine_full <- rbind(df_red,df_white)
-df_white["Wine_Type"] <- toString(df_white["Wine_Type"])
-
 #I will split the data into training and validation, and will calculate the prediction accuracy of KNN on the validation data
-
-n <- length(wine_full$fixed.acidity)
+sm_tib<-sm_tib[-10]
+n <- length(sm_tib[[1]])
 unrand_index <- 1:n
-rand_index <- sample(unrand_index)
+rand_index <- sample(unrand_index,n,replace=F)
 breakpoint <- n %/% 2
 training_index <- rand_index[1:breakpoint]
 validation_index <- rand_index[(breakpoint+1):n]
-training_data <- wine_full[training_index,]
-validation_data <- wine_full[validation_index,]
+training_data <- sm_tib[training_index,c(-1,-5,-8)]
+validation_data <- sm_tib[validation_index,c(-1,-5,-8)]
+  #Note that here I drop categorical varibles that interfere with the KNN algorithm
+
 
 #Now, we can proceed with fitting our KNN model on the training data
 library(caret)
 set.seed(1)
 trainControl <- trainControl(method="repeatedcv",number=10,repeats=3)
-fit.knn <- train(quality~., 
+fit.knn <- train(Total_Gross~., 
                  data = training_data, 
                  method="knn", 
                  preProcess=c("center","scale"),
                  trcontrol=trainControl)
 print(fit.knn)
 
-#Thus, according to our K-Fold Cross validation, we will proceed with the k=9 nearest neighbors
+#Thus, according to our K-Fold Cross validation, we will proceed with the k=5 nearest neighbors
 #model since it has the lowest Training RMSE
+library(plyr)
 test_pred <- predict(fit.knn,newdata=validation_data)
 test_pred <- round(test_pred)
-validation_data["pred_quality"] <- test_pred
-accuracy <- mean(validation_data$quality == validation_data$pred_quality)
-statement_KNN <- paste0("The test accuracy of our KNN algorithm with K=9 is: ", round(accuracy,digits=3))
+validation_data["pred_T_Gross"] <- test_pred
+accuracy <- mean((validation_data$Total_Gross-validation_data$pred_T_Gross)/validation_data$Total_Gross <= 0.5)
+statement_KNN <- paste0("The test accuracy of our KNN algorithm with K=5 is: ", round(accuracy,digits=3))
 print(statement_KNN)
+<<<<<<< HEAD
 
 #K-Means Clustering on Movies Dataset 
 library(dplyr)
@@ -64,4 +107,7 @@ for (i in 1:length(names(sm_tib))){
     
   }
 }
+=======
+```
+>>>>>>> 7fd972a308db3e1237f09e4b3cdac07a9dd3531d
 ```
