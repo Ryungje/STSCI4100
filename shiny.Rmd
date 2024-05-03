@@ -106,8 +106,37 @@ mean(unique(movies$Running_Time))
 
 
 
+```{r}
+# plot with gross profits  vs budget
+model <- lm(log(Total_Gross) ~ log(Budget), data=simple_movies)
 
+ggplot() + 
+  geom_point(data=simple_movies, aes(x= log(Budget), y=log(Total_Gross), col=Overall_Rank)) +
+  geom_abline(slope = 1, intercept = 0, color = "red", linetype = "dashed") + 
+  geom_abline(slope = model$coefficients[2], intercept = model$coefficients[1], color = "deeppink") + 
+  xlab("Log of Budgets (in dollars)") + 
+  ylab("Log of Total Gross Profits (in dollars)") + 
+  ggtitle("Gross Profits vs Budget") +
+  geom_text(aes(x = 9.8, y = 20, label = "x=y"), col="red") + 
+  scale_color_gradient(low = "blue", high = "yellow")
 
+# Display: For every 1% increase in budget, profirs increase by 0.6%
+model$coefficients[2]
+```
+```{r 2}
+# plot with budget vs rank
+model2 <- lm(Budget~Overall_Rank, data = simple_movies)
+
+ggplot() + 
+  geom_point(data=simple_movies, aes(x= Overall_Rank, y=Budget/1000000)) +
+  geom_abline(slope = -model2$coefficients[2]/1000000, intercept = model2$coefficients[1]/1000000, color = "blue") + 
+  xlab("Rank") + 
+  ylab("Budget (in millions of dollars)") + ggtitle("Budget vs Rank") + 
+  scale_x_reverse() 
+
+#Display this: To decrease 1 unit in rank (lower rank is better), budget increases by approximately $745,000
+-model2$coefficients[2]
+```
 
 
 
