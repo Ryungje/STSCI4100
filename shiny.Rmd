@@ -30,7 +30,7 @@ plotDistributor = function(plotthis) {
   ## Plotting top 10 Movie Distributors
   
     # sort top Distributors
-  temp <- tail(sort(table(movies$Distributor), decreasing=FALSE), n=10)
+  temp <- tail(sort(table(simple_movies$Distributor), decreasing=FALSE), n=10)
   temp <- data.frame(temp)
   names(temp) <- c("Distributor", "Movies_Released")
   
