@@ -44,6 +44,32 @@ plotBasic = function(plotthis){
 }
 
 
+plotKMeans = function(plotthis){
+  
+  sm_tib<-as_tibble(simple_movies)
+  continous_numeric_cols <- c(5,7,8)
+  
+  #Standardization of continous numeric data in our movies dataset 
+  for (i in 1:length(names(sm_tib))){
+    if(class(sm_tib[names(sm_tib)[i]][[1]]) %in% c("integer","numeric")){
+      continous_numeric_cols<-c(continous_numeric_cols,i)
+    }
+  }
+  sm_tib_k <- sm_tib[,continous_numeric_cols]
+  sm_tib_k <- sm_tib_k[c(-8,-9)]
+  for (i in 4:(length(sm_tib_k))){
+    sm_tib_k[,i] <- (sm_tib_k[,i]-mean(sm_tib_k[,i][[1]]))/sd(sm_tib_k[,i][[1]])
+  }
+
+  
+  clustering <- kmeans(sm_tib_k[,4:7], as.numeric(plotthis)) 
+  sm_tib_k$cluster<-clustering$cluster
+  
+    #plot clusters
+  factoextra::fviz_cluster(clustering, sm_tib_k[,4:7], geom="point")
+}
+
+
 ```
 
 
@@ -63,6 +89,26 @@ ui <- page_navbar(
                        ),
               ),
     nav_panel("Top Distributors", plotOutput("dist")),
+    nav_panel("K Means", 
+              page_sidebar(
+                sidebar = sidebar(
+                  helpText(
+                    "Using Genre as Categorical Variable"
+                  ),
+                  selectInput(
+                    "var",
+                    label = "Choose K",
+                    choices = 
+                      list(
+                        "13",
+                        "4",
+                        "56"
+                      )
+                  )
+                ),
+                plotOutput("selected_var")
+              )
+              )
     ),
   
   nav_spacer(),
@@ -96,7 +142,9 @@ server <- function(input, output) {
     plotDistributor(input$thisvar)
   )
   
-  
+  output$selected_var <- renderPlot({
+    plotKMeans(input$var)
+  })
 }
 
 shinyApp(ui, server)

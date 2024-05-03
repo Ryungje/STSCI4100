@@ -3,6 +3,8 @@ title: "KNN-MovieData-Code"
 author: "az296"
 date: "2024-05-02"
 output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
@@ -29,6 +31,8 @@ options(dplyr.summarise.inform = FALSE)
 #K-Means Clustering on Movies Dataset 
 library(dplyr)
 load(r"[C:\Users\andre\Desktop\Cornell\Senior Spring\BTRY4100\Final_Project\simple_movies.RData]")
+
+
 sm_tib<-as_tibble(simple_movies)
 continous_numeric_cols <- c(5,7,8)
 
@@ -44,20 +48,29 @@ for (i in 4:(length(sm_tib_k))){
   sm_tib_k[,i] <- (sm_tib_k[,i]-mean(sm_tib_k[,i][[1]]))/sd(sm_tib_k[,i][[1]])
 }
 
+
 #We choose K to be the genres of movies, which is a reasonable categorical variable for which our movies might be sorted into.
-clustering <- kmeans(sm_tib_k[,4:7], 13)
+clustering <- kmeans(sm_tib_k[,4:7], 13) 
 sm_tib_k$cluster<-clustering$cluster
+
+  #plot clusters
+factoextra::fviz_cluster(clustering, sm_tib_k[,4:7], geom="point")
+
 
 #Since our 13 clusters do not correspond well with Genre, we can now explore the clusters of
 clustering <- kmeans(sm_tib_k[,4:7], 4)
 sm_tib_k$cluster<-clustering$cluster
 
+factoextra::fviz_cluster(clustering, sm_tib_k[,4:7])
+
   #There seems to be some rough correspondence with roughly Group 1 being mostly Non-Rated movies. Group 2 & Group 3 having mostly PG-13 movies, and Group 4 having mostly rated R movies.
+
 
 #Note that there does not seem to be any relationship between the generated k-means groups and our film distributor data 
 clustering <- kmeans(sm_tib_k[,4:7], 56)
 sm_tib_k$cluster<-clustering$cluster
 
+factoextra::fviz_cluster(clustering, sm_tib_k[,4:7])
 
 
 #K-Nearest Neighbors Algorithm On Movies DataSet (az296)
