@@ -75,7 +75,6 @@ plotKMeans = function(plotthis){
 ```
 
 ```{r}
-
 plotGrossBudget = function(){
   # plot with gross profits  vs budget
   model <- lm(log(Total_Gross) ~ log(Budget), data=simple_movies)
