@@ -208,7 +208,6 @@ server <- function(input, output) {
   
   output$budget <- renderPlot({
     if (input$budget == "Total Gross"){
-      print("HELLO")
       plotGrossBudget() 
     }
     else if (input$budget == "Rank"){

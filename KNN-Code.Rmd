@@ -73,7 +73,7 @@ sm_tib_k$cluster<-clustering$cluster
 factoextra::fviz_cluster(clustering, sm_tib_k[,4:7])
 
 
-#K-Nearest Neighbors Algorithm On Movies DataSet (az296)
+z#K-Nearest Neighbors Algorithm On Movies DataSet (az296)
 
 #I will split the data into training and validation, and will calculate the prediction accuracy of KNN on the validation data
 sm_tib<-sm_tib[-10]
@@ -109,6 +109,11 @@ accuracy <- mean((validation_data$Total_Gross-validation_data$pred_T_Gross)/vali
 statement_KNN <- paste0("The test accuracy of our KNN algorithm with K=5 is: ", round(accuracy,digits=3))
 print(statement_KNN)
 <<<<<<< HEAD
+
+library("plotly")
+#Plotting K Nearest Neighbors
+plot_ly(fit.knn)
+
 
 #K-Means Clustering on Movies Dataset 
 library(dplyr)
