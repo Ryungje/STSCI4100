@@ -1,3 +1,14 @@
+---
+title: "Shiny App Interface"
+author: "jrc447"
+date: "2024-04-29"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
 ```{r}
 library("shiny")
 library("ggplot2")
@@ -66,8 +77,8 @@ ui <- page_navbar(
   nav_menu(
     title = "Authors",
     align = "right",
-    nav_item("Ilona Khimey"), 
     nav_item("James Chun"),
+    nav_item("Ilona Khimey"), 
     nav_item("Andrew Zhang")
   ),
   fluid=TRUE
@@ -100,7 +111,7 @@ shinyApp(ui, server)
 
 
 # Average Running Time
-mean(unique(movies$Running_Time))
+#mean(unique(movies$Running_Time))
 
 ```
 
