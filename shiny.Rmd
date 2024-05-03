@@ -90,6 +90,7 @@ plotGrossBudget = function(){
     ylab("Log of Total Gross Profits (in dollars)") + 
     ggtitle("Gross Profits vs Budget") +
     geom_text(aes(x = 9.8, y = 20, label = "x=y"), col="red") + 
+    geom_text(aes(x=10.5, y=19.5, label = "coefficient of log(Budget) = 0.60")) +
     scale_color_gradient(low = "blue", high = "yellow")
   
 }
@@ -110,6 +111,7 @@ plotRankBudget = function(){
     geom_abline(slope = -model2$coefficients[2]/1000000, intercept = model2$coefficients[1]/1000000, color = "blue") + 
     xlab("Rank") + 
     ylab("Budget (in millions of dollars)") + ggtitle("Budget vs Rank") + 
+    geom_text(aes(x=190, y=400, label = "coefficient of Rank = 745215.8")) +
     scale_x_reverse() 
 }
 ```
