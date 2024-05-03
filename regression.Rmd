@@ -1,0 +1,20 @@
+---
+title: "regression"
+author: "ik273"
+date: "2024-05-03"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+load("simple_movies.RData")
+
+lm_model <- lm(Total_Gross ~ Budget + Running_Time + Genre+ MPAA, data = simple_movies)
+
+summary(lm_model)
+
+```
