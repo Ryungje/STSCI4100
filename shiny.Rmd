@@ -14,7 +14,7 @@ library("shiny")
 library("ggplot2")
 library("bslib")
 library("DT")
-
+library("dplyr")
 
 # Import movie data
 
