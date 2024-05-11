@@ -11,10 +11,18 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 ```{r}
-load("simple_movies.RData")
+#MLR-1 (Full_Model)
+lm_model_1 <- lm(Total_Gross ~ Budget + Running_Time + Genre + 
+MPAA, data = simple_movies)
+summary(lm_model_1)
 
-lm_model <- lm(Total_Gross ~ Budget + Running_Time + Genre+ MPAA, data = simple_movies)
+#MLR-2
+lm_model_2 <- lm(Total_Gross ~ Budget + Running_Time + Genre + 
+MPAA + Genre*Budget + Genre*Running_Time, data = simple_movies)
+summary(lm_model_2)
 
-summary(lm_model)
-
+#MLR-3
+lm_model_3 <- lm(Total_Gross ~ Budget + Running_Time + Genre +
+MPAA + MPAA*Budget + MPAA*Running_Time, data = simple_movies)
+summary(lm_model_3)
 ```
