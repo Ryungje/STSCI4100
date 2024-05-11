@@ -57,16 +57,15 @@ sm_tib_k$cluster<-clustering$cluster
 factoextra::fviz_cluster(clustering, sm_tib_k[,4:7], geom="point")
 
 
-#Since our 13 clusters do not correspond well with Genre, we can now explore the clusters of
+#Since our 13 clusters do not correspond well with Genre, we can now explore the clusters of MPAA
 clustering <- kmeans(sm_tib_k[,4:7], 4)
 sm_tib_k$cluster<-clustering$cluster
 
 factoextra::fviz_cluster(clustering, sm_tib_k[,4:7])
 
-  #There seems to be some rough correspondence with roughly Group 1 being mostly Non-Rated movies. Group 2 & Group 3 having mostly PG-13 movies, and Group 4 having mostly rated R movies.
+#There seems to be some rough correspondence with roughly Group 1 being mostly Non-Rated movies. Group 2 & Group 3 having mostly PG-13 movies, and Group 4 having mostly rated R movies.
 
 
-#Note that there does not seem to be any relationship between the generated k-means groups and our film distributor data 
 clustering <- kmeans(sm_tib_k[,4:7], 56)
 sm_tib_k$cluster<-clustering$cluster
 
@@ -99,7 +98,7 @@ fit.knn <- train(Total_Gross~.,
                  trcontrol=trainControl)
 print(fit.knn)
 
-#Thus, according to our K-Fold Cross validation, we will proceed with the k=5 nearest neighbors
+#Thus, according to our Repeated Cross validation, we will proceed with the k=5 nearest neighbors
 #model since it has the lowest Training RMSE
 library(plyr)
 test_pred <- predict(fit.knn,newdata=validation_data)
@@ -113,18 +112,6 @@ print(statement_KNN)
 library("plotly")
 #Plotting K Nearest Neighbors
 plot_ly(fit.knn)
-
-
-#K-Means Clustering on Movies Dataset 
-library(dplyr)
-load(r"[C:\Users\andre\Desktop\Cornell\Senior Spring\BTRY4100\Final_Project\simple_movies.RData]")
-sm_tib<-as_tibble(simple_movies)
-continous_numeric_cols <- col
-for (i in 1:length(names(sm_tib))){
-  if(class(sm_tib[names(sm_tib)[i]][[1]]) %in% c("integer","numeric")){
-    
-  }
-}
 =======
 ```
 >>>>>>> 7fd972a308db3e1237f09e4b3cdac07a9dd3531d
